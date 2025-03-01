@@ -9,7 +9,7 @@ A Blender addon that enables import of CAD files (STEP/IGES formats) through con
 
 ![Plugin Preferences]<img src="doc/en1.png"/> 
 
-![Plugin Demo]<img src="doc/Demo.mp4"/> 
+![Plugin Demo]<img src="doc/Demo.gif"/> 
 
 ## Features
 
