@@ -108,8 +108,8 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         name=_('Convert Target Format'),  # 🌐
         description='Mayo export format and Blender improt Format',
         items=[
-            ('.gltf', '.gltf', _('GLTF: Slow import with empty object hierarchy'), 0, 0),  # 🌐
-            ('.obj', '.obj', _('OBJ: Fast import with collection hierarchy'), 0, 1)],  # 🌐
+            ('.gltf', '.gltf', _('GLTF: Import with empty object hierarchy'), 0, 0),  # 🌐
+            ('.obj', '.obj', _('OBJ: Import with collection hierarchy'), 0, 1)],  # 🌐
         default='.obj',
         options={'HIDDEN'}
     )
@@ -1120,7 +1120,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         layout.use_property_decorate = False  # No animation.
         pre=get_pre()
 
-        t=_("OBJ: Fast import with collections") if pre.geshi == '.obj' else _("GLTF: Slow import with empty hierarchy")
+        t=_("OBJ: Import with collections") if pre.geshi == '.obj' else _("GLTF: Import with empty hierarchy")
         row=layout.row()
         row.alert = True
         row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
@@ -1574,8 +1574,8 @@ specific_dict = {
     ('*', 'Path to mayo-conv.exe executable'): 'mayo-conv.exe文件路径',
     ('*', 'Convert Target Format'): '转换格式',
     ('*', 'Mayo export format and Blender improt Format'): 'Mayo导出和Blender导入的格式',
-    ('*', 'GLTF: Slow import with empty object hierarchy'): 'GLTF：导入速度慢，使用空物体父子层级',
-    ('*', 'OBJ: Fast import with collection hierarchy'): 'OBJ：导入速度快，使用集合层级',
+    ('*', 'GLTF: Import with empty object hierarchy'): 'GLTF：使用空物体父子层级',
+    ('*', 'OBJ: Import with collection hierarchy'): 'OBJ：使用集合层级',
     ('*', 'Mesh Quality'): '网格质量',
     ('*', 'Controls CAD model to mesh conversion precision'): '控制Mayo导入CAD模型后转换到网格的转换精度',
     ('*', 'Very Coarse'): '非常粗糙',
@@ -1620,8 +1620,8 @@ specific_dict = {
 
         # 操作类文本
     ('*', 'Import STEP/IGES'): '导入 STEP/IGES',
-    ('*', 'GLTF: Slow import with empty hierarchy'): 'GLTF：导入慢，空物体层级',
-    ('*', 'OBJ: Fast import with collections'): 'OBJ：导入快，集合层级',
+    ('*', 'GLTF: Import with empty hierarchy'): 'GLTF：空物体父子层级结构',
+    ('*', 'OBJ: Import with collections'): 'OBJ：集合层级结构',
     ('*', 'Lower values = Smaller model'): '数值越小，模型越小',
     ('*', 'Lower values = Larger model'): '数值越小，模型越大',
     ('*', 'Single file import only'): '仅支持单文件导入',
@@ -1657,10 +1657,10 @@ japanese_dict = {
     ('*', 'Convert Target Format'): 
         'フォーマット変換',
     ('*', 'Mayo export format and Blender improt Format'): 'Mayoでエクスポートし、Blenderでインポートするフォーマット',
-    ('*', 'GLTF: Slow import with empty object hierarchy'): 
-        'GLTF：インポート速度遅（空オブジェクト階層）',
-    ('*', 'OBJ: Fast import with collection hierarchy'): 
-        'OBJ：高速インポート（コレクション階層）',
+    ('*', 'GLTF: Import with empty object hierarchy'): 
+        'GLTF：空オブジェクト階層',
+    ('*', 'OBJ: Import with collection hierarchy'): 
+        'OBJ：コレクション階層',
     ('*', 'Mesh Quality'): 
         'メッシュ品質',
     ('*', 'Controls CAD model to mesh conversion precision'): 
@@ -1722,10 +1722,10 @@ japanese_dict = {
     # 操作类文本
     ('*', 'Import STEP/IGES'): 
         'STEP/IGESをインポート',
-    ('*', 'GLTF: Slow import with empty hierarchy'): 
-        'GLTF：低速インポート（空オブジェクト階層）',
-    ('*', 'OBJ: Fast import with collections'): 
-        'OBJ：高速インポート（コレクション階層）',
+    ('*', 'GLTF: Import with empty hierarchy'): 
+        'GLTF：空オブジェクト階層',
+    ('*', 'OBJ: Import with collections'): 
+        'OBJ：コレクション階層',
     ('*', 'Lower values = Smaller model'): 
         '値が小さいほど縮小',
     ('*', 'Lower values = Larger model'): 

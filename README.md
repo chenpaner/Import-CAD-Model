@@ -72,7 +72,7 @@ This addon requires  Windows
 ### Conversion Settings
 | Parameter          | Description                                                                 |
 |--------------------|-----------------------------------------------------------------------------|
-| **Output Format**  | `.gltf` (slow, hierarchy) / `.obj` (fast, collections)                      |
+| **Output Format**  | `.gltf` (hierarchy) / `.obj` (collections)                      |
 | **Mesh Quality**   | Controls BRep conversion precision (trade-off between speed and accuracy)  |
 | **Global Scale**   | Adjust model scaling factor (0.0001-100)                                   |
 | **Post-Process**   | Auto-delete temp files, clean duplicate materials                          |
