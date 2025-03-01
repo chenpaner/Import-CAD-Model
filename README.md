@@ -1,8 +1,8 @@
 
-# STEP/IGES Importer for Blender
-
 [![Blender](https://img.shields.io/badge/Blender-4.0+-orange.svg)](https://www.blender.org)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+# Import CAD Model for Blender
 
 A Blender addon that enables import of CAD files (STEP/IGES formats) through conversion to mesh formats using Mayo conversion toolkit.
 
@@ -43,7 +43,7 @@ This addon requires  Windows
 ## Installation
 
 1. **Install Addon**
--1. Download the latest `.zip` file from [Releases](https://github.com/yourusername/auto-maximize-nodes/releases).
+-1. Download the latest `.zip` file from [Releases](https://github.com/chenpaner/Import-CAD-Model/releases).
 -2. In Blender, go to **Edit > Preferences > Add-ons**.
 -3. Click **Install...** and select the downloaded `.zip` file.
 -4. Enable the checkbox next to "Stp/IGES Import".
@@ -75,23 +75,13 @@ This addon requires  Windows
 | **Post-Process**   | Auto-delete temp files, clean duplicate materials                          |
 
 
-### Troubleshooting
-**Common Issues**  
-❌ "mayo-conv.exe not found"  
-✅ Verify executable path in addon preferences  
 
-
-
-## Support
-
-| Resource                  | Link                                                                 |
-|---------------------------|---------------------------------------------------------------------|
-| Documentation             | [Plugin Wiki](https://github.com/yourusername/blender-step-import/wiki) |
-| Issue Tracking            | [GitHub Issues](https://github.com/yourusername/blender-step-import/issues) |
-| Commercial Support        | contact@yourdomain.com                                              |
+## Todo
+-  **Support opening multiple models at once**
+-  **Automatically update models (instead of re-importing them)**
 
 ---
 
 **Disclaimer**  
 This addon is not affiliated with the Mayo project. CAD conversion quality depends on Mayo's core functionality.
-````
+

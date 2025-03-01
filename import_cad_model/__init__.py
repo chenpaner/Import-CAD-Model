@@ -1,8 +1,8 @@
 
 bl_info = {
-    "name" : "Stp/IGES Import",
+    "name" : "Import CAD Model",
     "author" : "CP-Design", 
-    "description" : "This addon lets you import stp/iges files in Blender 4.0+",
+    "description" : "This addon lets you import CAD Model(stp/iges) files in Blender 4.0+",
     "blender" : (4, 0, 0),
     "version" : (1, 0, 0),
     "location" : "File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop",
@@ -29,7 +29,7 @@ from bpy_extras.io_utils import ImportHelper, poll_file_object_drop
 import time
 import configparser
 from bpy.app.handlers import persistent
-from bpy.app.translations import pgettext as _
+from bpy.app.translations import pgettext_iface as _
 
 def get_ini_directory():
     plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -93,7 +93,7 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
 
     show_import_plane: bpy.props.BoolProperty(
         name=_('Show Options Panel Before Import'),
-        description=_('Always display options panel before import. Resets when loading/creating new files'),
+        description=_('Display this panel before each import.\nAuto reset on file load/creat new file.\nCan be re-enabled in the plugin settings.'),
         default=True
     )
 
@@ -105,8 +105,8 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
     )
 
     geshi: bpy.props.EnumProperty(
-        name=_('Format'),  # 🌐
-        description='',
+        name=_('Convert Target Format'),  # 🌐
+        description='Mayo export format and Blender improt Format',
         items=[
             ('.gltf', '.gltf', _('GLTF: Slow import with empty object hierarchy'), 0, 0),  # 🌐
             ('.obj', '.obj', _('OBJ: Fast import with collection hierarchy'), 0, 1)],  # 🌐
@@ -136,12 +136,11 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         update=update_inifile
     )
     
-    # global_scale: FloatProperty(
-    #     name='Scale',
-    #     description='Scale',
-    #     default=0.1,
-    #     min=0.0001,max=10000,options={'HIDDEN'},
-    # )
+    # global_scale : FloatProperty(
+    # name='Scale', 
+    # description='Value by which to enlarge or shrink the objects with respect to the world origin', 
+    # default=1.0, min=9.999999747378752e-05, max=10000.0)
+
     global_scale:EnumProperty(
         items=[
         # ("1000", "1000.0", "Scale by 1000.0"),
@@ -154,9 +153,36 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         ("0.0001", "0.0001", "Scale by 0.0001"),
         ],
         name=_("Scale Factor"),  # 🌐
-        description=_("Model scaling factor"),  # 🌐
+        description=_("Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format"),  # 🌐
         default="1"
     )
+
+    forward_axis : EnumProperty(
+        name='Forward Axis', description='', 
+        items=[
+            ('X', 'X', 'Positive X axis'), 
+            ('Y', 'Y', 'Positive Y axis'), 
+            ('Z', 'Z', 'Positive Z axis'), 
+            ('NEGATIVE_X', '-X', 'Negative X axis'), 
+            ('NEGATIVE_Y', '-Y', 'Negative Y axis'), 
+            ('NEGATIVE_Z', '-Z', 'Negative Z axis')
+            ], 
+        default='NEGATIVE_Z'
+        )
+    up_axis : EnumProperty(
+        name='Up Axis', description='', 
+        items=[
+            ('X', 'X', 'Positive X axis'), 
+            ('Y', 'Y', 'Positive Y axis'), 
+            ('Z', 'Z', 'Positive Z axis'), 
+            ('NEGATIVE_X', '-X', 'Negative X axis'), 
+            ('NEGATIVE_Y', '-Y', 'Negative Y axis'), 
+            ('NEGATIVE_Z', '-Z', 'Negative Z axis')
+            ], 
+        default='Y'
+        )
+
+
 
     del_gltf: BoolProperty(
         name=_('Del Mesh File After Imported'),  # 🌐
@@ -1090,19 +1116,38 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         operator = self
         layout = self.layout
 
-        # layout.use_property_split = True
+        layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         pre=get_pre()
-        if pre.geshi == '.gltf':
-            layout.label(text=_("GLTF: Slow import with empty hierarchy"), icon="QUESTION")  # 🌐
-        else:
-            layout.label(text=_("OBJ: Fast import with collections"), icon="QUESTION")  # 🌐
+
+        t=_("OBJ: Fast import with collections") if pre.geshi == '.obj' else _("GLTF: Slow import with empty hierarchy")
+        row=layout.row()
+        row.alert = True
+        row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
+        row.label(text=t, icon="QUESTION")
         layout.prop(pre, 'geshi')
 
-        layout.label(text=_("Lower values = smaller scale" if pre.geshi == '.obj' else "Lower values = larger scale"),icon="QUESTION")
-        layout.prop(pre, 'global_scale')
-
         layout.prop(pre, 'mesh_quality')
+
+        if bpy.app.version >= (4, 2):
+            layout.separator(type="LINE")  
+        else:
+            layout.separator()
+
+        row=layout.row()
+        row.alert = True
+        row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
+        row.label(text=_("Lower values = Smaller model" if pre.geshi == '.obj' else "Lower values = Larger model"),icon="QUESTION")
+        layout.prop(pre, 'global_scale')
+        if pre.geshi == '.obj':
+            layout.prop(pre, 'forward_axis')
+            layout.prop(pre, 'up_axis')
+
+        if bpy.app.version >= (4, 2):
+            layout.separator(type="LINE")  
+        else:
+            layout.separator()
+        
 
         layout.prop(pre, 'del_gltf')
         layout.prop(pre, 'clean_mat')
@@ -1215,6 +1260,8 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                         # 使用新版本OBJ导入器
                         bpy.ops.wm.obj_import(
                             filepath=output_path,
+                            forward_axis=get_pre().forward_axis,#'NEGATIVE_Z',#前进轴-z
+                            up_axis=get_pre().up_axis,#'Y',#向上y
                             global_scale=scale_factor,
                             use_split_objects=True,
                             use_split_groups=True,
@@ -1241,17 +1288,34 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                     except Exception as e:
                         self.report({'WARNING'}, f"File cleanup failed.: {str(e)}")
 
-               
+                # 正则表达式匹配 . 后面跟着数字的模式
+                suffix_pattern = re.compile(r'\.\d+$')
+
                 # 处理新导入的物体
                 new_objects = [obj for obj in bpy.context.view_layer.objects if obj not in self.initial_objects]
+                try:
+                    now = datetime.now()
+                    now = int(now.strftime("%Y%m%d%H%M%S"))
+                    for obj in new_objects:
+                        obj.CADM_obj_Props.from_mayo=True
+                        obj.CADM_obj_Props.import_time=now
+                        if obj.type == 'MESH':#if hasattr(obj, 'data'):#
+                            meshname=obj.data.name
+                            match = suffix_pattern.search(obj.data.name)
+                            if match:
+                                meshname = suffix_pattern.sub('', obj.data.name)
+                            obj.CADM_obj_Props.mesh_name=meshname
 
+                            bpy.data.meshes[obj.data.name].CADM_mesh_Props.base_name=meshname
+                            bpy.data.meshes[obj.data.name].CADM_mesh_Props.import_time=now
+                except:
+                    pass
                 new_mats = [mat for mat in bpy.data.materials if mat not in self.before_import_mat]
                 for mat in new_mats:
                     current_color = mat.diffuse_color
                     mat.diffuse_color = (current_color[0], current_color[1], current_color[2], 1)
 
-                # 正则表达式匹配 . 后面跟着数字的模式
-                suffix_pattern = re.compile(r'\.\d+$')
+                
                 empty_object = None
                 for obj in new_objects:
                     if obj.type == 'EMPTY':
@@ -1351,7 +1415,9 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         if not os.path.isfile(get_pre().exe_path):
             self.report({'ERROR'}, "mayo-conv.exe path wrong！")
             return {'CANCELLED'}
-
+        if os.path.basename(get_pre().exe_path).lower() != "mayo-conv.exe":
+            self.report({'ERROR'}, "The path does not point to mayo-conv.exe!")
+            return {'CANCELLED'}
         ini_path = get_ini_directory()
         if not os.path.isfile(ini_path):
             self.report({'ERROR'}, _('No found the mayo-gui.ini file in plugin directory!'))
@@ -1467,7 +1533,7 @@ def status_bar_draw(self, context,text,importing=False,):
 def sna_add_to_topbar_mt_file_import_4A389(self, context):
     self.layout.operator(IMPORT_OT_STEPtoGLTF.bl_idname, text='STEP/IGES (*.step *.stp *.iges *.igs)',emboss=True, depress=False)
         
-#TODO:自动更新网格避免重复导入；直接拖入stp文件导入,拖入多个文件,添加导入预设保存
+#TODO:自动更新网格避免重复导入,拖入多个文件,添加导入预设保存;是否可以让mayo直接转换obj和iges两种，然后让用户一次把2种都导入
 
 class IO_FH_Step_Iges(bpy.types.FileHandler):
     bl_idname = "IO_FH_step_iges"
@@ -1478,7 +1544,18 @@ class IO_FH_Step_Iges(bpy.types.FileHandler):
     @classmethod
     def poll_drop(cls, context):
         return poll_file_object_drop(context)
-        
+
+
+##为后面自动更新网格准备
+class CADM_obj_Props(bpy.types.PropertyGroup):
+    from_mayo: BoolProperty(name="From to Mayo",description="",default=False)
+    mesh_name: StringProperty(name='mesh name', description='记录网格无后缀的原始名字', default='', subtype='NONE', maxlen=0)
+    import_time: FloatProperty(name='import time', description='', default=0.0, subtype='TIME', unit='TIME', step=3, precision=0)
+
+class CADM_mesh_Props(bpy.types.PropertyGroup):
+    base_name: bpy.props.StringProperty(name='base name', description='记录网格无后缀的原始名字', default='', subtype='NONE', maxlen=0)
+    import_time: bpy.props.FloatProperty(name='import time', description='', default=0.0, subtype='TIME', unit='TIME', step=3, precision=0)
+
 specific_dict = {
     # bl_info 元数据
     ('*', 'This addon lets you import stp/iges files in Blender 4.0+'): '这个插件让你将STEP/IGES文件直接导入Blender 4.0+',
@@ -1490,11 +1567,13 @@ specific_dict = {
 
     # 首选项面板
     ('*', 'Show Options Panel Before Import'): '导入前显示选项面板',
-    ('*', 'Always display options panel before import. Resets when loading/creating new files'): '始终显示导入选项面板，加载/新建文件时重置',
+    ('*', 'Display this panel before each import.\nAuto reset on file load/creat new file.\nCan be re-enabled in the plugin settings.'): 
+        '始终显示导入选项面板,\n加载/新建文件时自动重置,\n你也可以手动去插件设置里打开面板',
     ('*', 'mayo-conv.exe Path'): 'mayo-conv.exe 路径',
     ('*', '..../mayo-conv.exe (Not mayo.exe)'): '..../mayo-conv.exe 路径(非 mayo.exe)',
     ('*', 'Path to mayo-conv.exe executable'): 'mayo-conv.exe文件路径',
-    ('*', 'Format'): '格式',
+    ('*', 'Convert Target Format'): '转换格式',
+    ('*', 'Mayo export format and Blender improt Format'): 'Mayo导出和Blender导入的格式',
     ('*', 'GLTF: Slow import with empty object hierarchy'): 'GLTF：导入速度慢，使用空物体父子层级',
     ('*', 'OBJ: Fast import with collection hierarchy'): 'OBJ：导入速度快，使用集合层级',
     ('*', 'Mesh Quality'): '网格质量',
@@ -1506,7 +1585,8 @@ specific_dict = {
     ('*', 'High precision'): '高精度',
     ('*', 'Highest precision'): '最高精度',
     ('*', 'Scale Factor'): '缩放系数',
-    ('*', 'Model scaling factor'): '模型缩放比例',
+    ('*', 'Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format'): 
+    'OBJ格式导入就是每个物体的缩放系数，\nGLTF格式导入就是父级空物体的缩放系数',
     ('*', 'Del Mesh File After Imported'): '导入后删除网格文件',
     ('*', 'Automatically remove converted files post-import'): '自动删除转换后的中转网格文件',
     ('*', 'Clean Duplicate Materials'): '清理重复材质',
@@ -1542,8 +1622,8 @@ specific_dict = {
     ('*', 'Import STEP/IGES'): '导入 STEP/IGES',
     ('*', 'GLTF: Slow import with empty hierarchy'): 'GLTF：导入慢，空物体层级',
     ('*', 'OBJ: Fast import with collections'): 'OBJ：导入快，集合层级',
-    ('*', 'Lower values = smaller scale'): '数值越小，模型越小',
-    ('*', 'Lower values = larger scale'): '数值越小，模型越大',
+    ('*', 'Lower values = Smaller model'): '数值越小，模型越小',
+    ('*', 'Lower values = Larger model'): '数值越小，模型越大',
     ('*', 'Single file import only'): '仅支持单文件导入',
     ('*', 'Mayo Convert CAD model failed: {}'): 'Mayo转换CAD模型失败：{}',
     ('*', 'Please wait,Mayo Converting: {}'): '请稍候，Mayo 转换模型中：{}',
@@ -1566,16 +1646,17 @@ japanese_dict = {
     # 首选项面板
     ('*', 'Show Options Panel Before Import'): 
         'インポート前にオプションパネルを表示',
-    ('*', 'Always display options panel before import. Resets when loading/creating new files'): 
-        '常にインポート前にオプションパネルを表示（新規ファイル作成時にリセット）',
+    ('*', 'Display this panel before each import.\nAuto reset on file load/creat new file.\nCan be re-enabled in the plugin settings.'): 
+        'インポート前に毎回このパネルを表示します。\nファイルの読み込みや新規作成時に自動的にリセットされます。\nプラグイン設定で再び有効化できます。',
     ('*', 'mayo-conv.exe Path'): 
         'mayo-conv.exeのパス',
     ('*', '..../mayo-conv.exe (Not mayo.exe)'): 
         '..../mayo-conv.exe（mayo.exeではありません）',
     ('*', 'Path to mayo-conv.exe executable'): 
         'mayo-conv.exe実行ファイルのパス',
-    ('*', 'Format'): 
-        'フォーマット',
+    ('*', 'Convert Target Format'): 
+        'フォーマット変換',
+    ('*', 'Mayo export format and Blender improt Format'): 'Mayoでエクスポートし、Blenderでインポートするフォーマット',
     ('*', 'GLTF: Slow import with empty object hierarchy'): 
         'GLTF：インポート速度遅（空オブジェクト階層）',
     ('*', 'OBJ: Fast import with collection hierarchy'): 
@@ -1598,8 +1679,8 @@ japanese_dict = {
         '最高精度',
     ('*', 'Scale Factor'): 
         'スケール係数',
-    ('*', 'Model scaling factor'): 
-        'モデルスケーリング比率',
+    ('*', 'Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format'): 
+        'OBJ形式のインポートは各オブジェクトの拡大縮小係数、\nGLTF形式のインポートは親の空オブジェクトの拡大縮小係数になります',
     ('*', 'Del Mesh File After Imported'): 
         'インポート後メッシュファイルを削除',
     ('*', 'Automatically remove converted files post-import'): 
@@ -1645,9 +1726,9 @@ japanese_dict = {
         'GLTF：低速インポート（空オブジェクト階層）',
     ('*', 'OBJ: Fast import with collections'): 
         'OBJ：高速インポート（コレクション階層）',
-    ('*', 'Lower values = smaller scale'): 
+    ('*', 'Lower values = Smaller model'): 
         '値が小さいほど縮小',
-    ('*', 'Lower values = larger scale'): 
+    ('*', 'Lower values = Larger model'): 
         '値が小さいほど拡大',
     ('*', 'Single file import only'): 
         '単一ファイルのみインポート可能',
@@ -1685,12 +1766,19 @@ def register():
         return
     for c in classes:
         bpy.utils.register_class(c)
+
+    bpy.types.Object.CADM_Props = bpy.props.PointerProperty(name='CAD-Model',type=CADM_obj_Props, options={'HIDDEN'})
+    bpy.types.Mesh.CADM_Props = bpy.props.PointerProperty(name='CAD-Model',type=CADM_mesh_Props, options={'HIDDEN'})
+
     bpy.types.TOPBAR_MT_file_import.append(sna_add_to_topbar_mt_file_import_4A389)
     bpy.app.handlers.load_post.append(load_set_show_import_plane_handler)
     bpy.app.translations.register(__package__, langs)
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
+
+    del bpy.types.Object.CADM_Props
+    del bpy.types.Mesh.CADM_Props
     bpy.types.TOPBAR_MT_file_import.remove(sna_add_to_topbar_mt_file_import_4A389)
 
     bpy.app.handlers.load_post.remove(load_set_show_import_plane_handler)
