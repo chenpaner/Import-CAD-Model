@@ -1753,7 +1753,9 @@ langs = {
 classes = (
     MayoConvPreferences,
     IMPORT_OT_STEPtoGLTF,
-    IO_FH_Step_Iges
+    IO_FH_Step_Iges,
+    CADM_obj_Props,
+    CADM_mesh_Props,
 )
 
 def register():

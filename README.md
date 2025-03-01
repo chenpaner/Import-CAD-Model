@@ -7,7 +7,7 @@ English | [中文](./中文.md)
 
 A Blender addon that enables import of CAD files (STEP/IGES formats) through conversion to mesh formats using Mayo conversion toolkit.
 
-![Plugin Demo](demo-screenshot.jpg) <!-- Add actual screenshot later -->
+![Plugin Demo]<img src="doc/en1.png"/> 
 
 ## Features
 
@@ -35,7 +35,7 @@ A Blender addon that enables import of CAD files (STEP/IGES formats) through con
 This addon requires  Windows 
 
 1. **Mayo Conversion Tool**  
-   Download Windows binaries from:  
+   Download Mayo-x.x.x-win64-binaries.zip or Mayo-x.x.x-win64-installer.exe from:  
    [https://github.com/fougue/mayo/releases](https://github.com/fougue/mayo/releases)
 
 2. **Blender**  
@@ -52,7 +52,7 @@ This addon requires  Windows
 2. **Configure Mayo Path**  
    ```python
    # In Blender Preferences:
-   Add-ons > Import-Export > STEP/IGES Importer
+   Add-ons > Import-Export > Import CAD Model 
    Set path to mayo-conv.exe in addon preferences
    ```
 
