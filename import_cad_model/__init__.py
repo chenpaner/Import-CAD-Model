@@ -94,24 +94,25 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
     show_import_plane: bpy.props.BoolProperty(
         name=_('Show Options Panel Before Import'),
         description=_('Display this panel before each import.\nAuto reset on file load/creat new file.\nCan be re-enabled in the plugin settings.'),
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     exe_path: StringProperty(
-        name=_("mayo-conv.exe Path"),  # 🌐
+        name=_("mayo-conv.exe Path"),  
         subtype='FILE_PATH',
-        default=_("..../mayo-conv.exe (Not mayo.exe)"),  # 🌐
-        description=_("Path to mayo-conv.exe executable")  # 🌐
+        default=_("..../mayo-conv.exe (Not mayo.exe)"),  
+        description=_("Path to mayo-conv.exe executable")  
     )
 
     geshi: bpy.props.EnumProperty(
-        name=_('Convert Target Format'),  # 🌐
+        name=_('Convert Target Format'),  
         description='Mayo export format and Blender improt Format',
         items=[
-            ('.gltf', '.gltf', _('GLTF: Import with empty object hierarchy'), 0, 0),  # 🌐
-            ('.obj', '.obj', _('OBJ: Import with collection hierarchy'), 0, 1)],  # 🌐
+            ('.gltf',_(".gltf (by parent Empty object)"), _('GLTF: Import with empty object hierarchy'), 0, 0),  
+            ('.obj', _(".obj (by collections)"), _('OBJ: Import with collection hierarchy'), 0, 1)],  
         default='.obj',
-        options={'HIDDEN'}
+        
     )
 
     ###其实这个导入ini可以直接设置,这些属性直接可以update更新插件里的ini文件
@@ -123,16 +124,15 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
     # )
 
     mesh_quality: EnumProperty(
-        name=_('Mesh Quality'),  # 🌐
-        description=_('Controls CAD model to mesh conversion precision'),  # 🌐
+        name=_('Mesh Quality'),  
+        description=_('Controls CAD model to mesh conversion precision'),  
         items=[
-            ('VeryCoarse', _('Very Coarse'), _('Fastest conversion with low detail'), 0, 0),  # 🌐
-            ('Coarse', _('Coarse'), _('Coarse quality'), 0, 1),  # 🌐
-            ('Normal', _('Normal'), _('Standard quality'), 0, 2),  # 🌐
-            ('Precise', _('Precise'), _('High precision'), 0, 3),  # 🌐
-            ('VeryPrecise', _('Very Precise'), _('Highest precision'), 0, 4)],  # 🌐
+            ('VeryCoarse', _('Very Coarse'), _('Fastest conversion with low detail'), 0, 0),  
+            ('Coarse', _('Coarse Quality'), _('Coarse quality'), 0, 1),  
+            ('Normal', _('Normal Quality'), _('Standard quality'), 0, 2),  
+            ('Precise', _('Precise Quality'), _('High precision'), 0, 3),  
+            ('VeryPrecise', _('Very Precise'), _('Highest precision'), 0, 4)],  
         default='Normal',
-        options={'HIDDEN'},
         update=update_inifile
     )
     
@@ -152,9 +152,9 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         ("0.001", "0.001", "Scale by 0.001"),
         ("0.0001", "0.0001", "Scale by 0.0001"),
         ],
-        name=_("Scale Factor"),  # 🌐
-        description=_("Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format"),  # 🌐
-        default="1"
+        name=_("Scale Factor"),  
+        description=_("Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format"),  
+        default="1",
     )
 
     forward_axis : EnumProperty(
@@ -167,7 +167,7 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
             ('NEGATIVE_Y', '-Y', 'Negative Y axis'), 
             ('NEGATIVE_Z', '-Z', 'Negative Z axis')
             ], 
-        default='NEGATIVE_Z'
+        default='NEGATIVE_Z',options={'HIDDEN'}
         )
     up_axis : EnumProperty(
         name='Up Axis', description='', 
@@ -185,16 +185,14 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
 
 
     del_gltf: BoolProperty(
-        name=_('Del Mesh File After Imported'),  # 🌐
-        description=_('Automatically remove converted files post-import'),  # 🌐
+        name=_('Del Mesh File After Imported'),  
+        description=_('Automatically remove converted files post-import'),  
         default=True,
-        options={'HIDDEN'}
     )
     clean_mat: BoolProperty(
-        name=_('Clean Duplicate Materials'),  # 🌐
-        description=_('Remove import-duplicate Materials with .001 suffixes '),  # 🌐
+        name=_('Clean Duplicate Materials'),  
+        description=_('Remove import-duplicate Materials with .001 suffixes '),  
         default=True,
-        options={'HIDDEN'}
     )
 
     def draw(self, context):
@@ -316,7 +314,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         input_path = os.path.abspath(self.filepath)
         output_dir = os.path.dirname(input_path)
         output_name = os.path.splitext(os.path.basename(input_path))[0]
-        gltf_path = os.path.join(output_dir, output_name + self.geshi)
+        gltf_path = os.path.join(output_dir, output_name + get_pre().geshi)
 
         #??是否应该在转换gltf前先检查是否已经有这个gltf文件，避免在cmd运行时就直接导入这个久的文件？？
         # 在构建cmd之前添加
@@ -367,7 +365,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
             # 导入生成的glTF文件
             self.report({'INFO'}, "转换完成，正在导入中...")
             if os.path.exists(gltf_path):
-                if self.geshi=='.gltf':
+                if get_pre().geshi=='.gltf':
                     bpy.ops.import_scene.gltf(filepath=gltf_path,merge_vertices=True)
                     #这里添加一个缩放将空物体缩放
                 else:
@@ -439,7 +437,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         layout.prop(pre, "show_import_plane")
 
     def invoke(self, context, event):
-        self.geshi=get_pre().geshi
+        get_pre().geshi=get_pre().geshi
         self.start_time = time.time()
         
         if len(self.files)>1:
@@ -487,7 +485,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 准备文件路径
                 output_path = os.path.join(
                     os.path.dirname(self.filepath),
-                    os.path.splitext(os.path.basename(self.filepath))[0] + self.geshi
+                    os.path.splitext(os.path.basename(self.filepath))[0] + get_pre().geshi
                 )
 
                 # 增强文件检查
@@ -510,12 +508,12 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 执行导入操作
                 scale_factor = float(get_pre().global_scale)
                 try:
-                    if self.geshi == '.gltf':
+                    if get_pre().geshi == '.gltf':
                         bpy.ops.import_scene.gltf(
                             filepath=output_path,
                             merge_vertices=True
                         )
-                    elif self.geshi == '.obj':
+                    elif get_pre().geshi == '.obj':
                         # 使用新版本OBJ导入器
                         bpy.ops.wm.obj_import(
                             filepath=output_path,
@@ -524,7 +522,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                             use_split_groups=True,
                             collection_separator='/'
                         )
-                    # elif self.geshi == '.stl':  # 添加STL支持
+                    # elif get_pre().geshi == '.stl':  # 添加STL支持
                     #     bpy.ops.import_mesh.stl(
                     #         filepath=output_path,
                     #         global_scale=get_pre().global_scale
@@ -538,7 +536,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                     try:
                         os.remove(output_path)
                         # 同时清理关联文件（针对glTF）
-                        if self.geshi == '.obj':
+                        if get_pre().geshi == '.obj':
                             bin_path = os.path.splitext(output_path)[0] + ".mtl"
                             if os.path.exists(bin_path):
                                 os.remove(bin_path)
@@ -578,7 +576,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                                                 bpy.data.materials.remove(newmat)
 
 
-                if empty_object and self.geshi == '.gltf':
+                if empty_object and get_pre().geshi == '.gltf':
                     # 设置空物体为活动物体并选中
                     bpy.context.view_layer.objects.active = empty_object
                     empty_object.select_set(True)
@@ -638,7 +636,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         input_path = os.path.abspath(self.filepath)
         output_dir = os.path.dirname(input_path)
         output_base = os.path.splitext(os.path.basename(input_path))[0]
-        output_path = os.path.join(output_dir, output_base + self.geshi)
+        output_path = os.path.join(output_dir, output_base + get_pre().geshi)
 
         # 清理旧文件增强
         if os.path.exists(output_path):
@@ -703,13 +701,13 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         if hasattr(self, 'del_gltf') and get_pre().del_gltf:
             output_path = os.path.join(
                 os.path.dirname(self.filepath),
-                os.path.splitext(os.path.basename(self.filepath))[0] + self.geshi
+                os.path.splitext(os.path.basename(self.filepath))[0] + get_pre().geshi
             )
             try:
                 if os.path.exists(output_path):
                     os.remove(output_path)
                     # 清理关联文件
-                    if self.geshi == '.obj':
+                    if get_pre().geshi == '.obj':
                         bin_path = os.path.splitext(output_path)[0] + ".mtl"
                         if os.path.exists(bin_path):
                             os.remove(bin_path)
@@ -775,7 +773,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
 
     # 自动修改视图的裁切深度值  同时监控self._process有没有可能会中通错误
     def invoke(self, context, event):
-        self.geshi=get_pre().geshi
+        get_pre().geshi=get_pre().geshi
         self.start_time = time.time()
         
         if len(self.files)>1:
@@ -831,7 +829,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 准备文件路径
                 output_path = os.path.join(
                     os.path.dirname(self.filepath),
-                    os.path.splitext(os.path.basename(self.filepath))[0] + self.geshi
+                    os.path.splitext(os.path.basename(self.filepath))[0] + get_pre().geshi
                 )
 
                 # 增强文件检查
@@ -854,12 +852,12 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 执行导入操作
                 scale_factor = float(get_pre().global_scale)
                 try:
-                    if self.geshi == '.gltf':
+                    if get_pre().geshi == '.gltf':
                         bpy.ops.import_scene.gltf(
                             filepath=output_path,
                             merge_vertices=True
                         )
-                    elif self.geshi == '.obj':
+                    elif get_pre().geshi == '.obj':
                         # 使用新版本OBJ导入器
                         bpy.ops.wm.obj_import(
                             filepath=output_path,
@@ -868,7 +866,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                             use_split_groups=True,
                             collection_separator='/'
                         )
-                    # elif self.geshi == '.stl':  # 添加STL支持
+                    # elif get_pre().geshi == '.stl':  # 添加STL支持
                     #     bpy.ops.import_mesh.stl(
                     #         filepath=output_path,
                     #         global_scale=get_pre().global_scale
@@ -882,7 +880,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                     try:
                         os.remove(output_path)
                         # 同时清理关联文件（针对glTF）
-                        if self.geshi == '.obj':
+                        if get_pre().geshi == '.obj':
                             bin_path = os.path.splitext(output_path)[0] + ".mtl"
                             if os.path.exists(bin_path):
                                 os.remove(bin_path)
@@ -922,7 +920,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                                                 bpy.data.materials.remove(newmat)
 
 
-                if empty_object and self.geshi == '.gltf':
+                if empty_object and get_pre().geshi == '.gltf':
                     # 设置空物体为活动物体并选中
                     bpy.context.view_layer.objects.active = empty_object
                     empty_object.select_set(True)
@@ -994,7 +992,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         input_path = os.path.abspath(self.filepath)
         output_dir = os.path.dirname(input_path)
         output_base = os.path.splitext(os.path.basename(input_path))[0]
-        output_path = os.path.join(output_dir, output_base + self.geshi)
+        output_path = os.path.join(output_dir, output_base + get_pre().geshi)
 
         # 取消所有物体的选择
         for obj in bpy.context.selected_objects:
@@ -1063,13 +1061,13 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         if hasattr(self, 'del_gltf') and get_pre().del_gltf:
             output_path = os.path.join(
                 os.path.dirname(self.filepath),
-                os.path.splitext(os.path.basename(self.filepath))[0] + self.geshi
+                os.path.splitext(os.path.basename(self.filepath))[0] + get_pre().geshi
             )
             try:
                 if os.path.exists(output_path):
                     os.remove(output_path)
                     # 清理关联文件
-                    if self.geshi == '.obj':
+                    if get_pre().geshi == '.obj':
                         bin_path = os.path.splitext(output_path)[0] + ".mtl"
                         if os.path.exists(bin_path):
                             os.remove(bin_path)
@@ -1096,6 +1094,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
     """Convert STEP to glTF and import"""
     bl_idname = "import_scene.step_to_gltf"
     bl_label = "Import STEP/IGES"
+    bl_options = {'UNDO'}
 
     filter_glob: bpy.props.StringProperty(
         default="*.step;*.stp;*.iges;*.igs",
@@ -1120,11 +1119,11 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         layout.use_property_decorate = False  # No animation.
         pre=get_pre()
 
-        t=_("OBJ: Import with collections") if pre.geshi == '.obj' else _("GLTF: Import with empty hierarchy")
-        row=layout.row()
-        row.alert = True
-        row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
-        row.label(text=t, icon="QUESTION")
+        # t=_(".obj (by collections)") if pre.geshi == '.obj' else _(".gltf (by parent Empty object)")
+        # row=layout.row()
+        # row.alert = True
+        # row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
+        # row.label(text=t, icon="QUESTION")
         layout.prop(pre, 'geshi')
 
         layout.prop(pre, 'mesh_quality')
@@ -1134,10 +1133,10 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         else:
             layout.separator()
 
-        row=layout.row()
-        row.alert = True
-        row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
-        row.label(text=_("Lower values = Smaller model" if pre.geshi == '.obj' else "Lower values = Larger model"),icon="QUESTION")
+        # row=layout.row()
+        # row.alert = True
+        # row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
+        # row.label(text=_("Lower values = Smaller model" if pre.geshi == '.obj' else "Lower values = Larger model"),icon="QUESTION")
         layout.prop(pre, 'global_scale')
         if pre.geshi == '.obj':
             layout.prop(pre, 'forward_axis')
@@ -1155,7 +1154,6 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         layout.prop(pre, "show_import_plane")
 
     def invoke(self, context, event):
-        self.geshi = get_pre().geshi
         self.start_time = time.time()
         try:
             context.space_data.clip_start=0.001
@@ -1188,7 +1186,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 while True:
                     source, line = self.output_queue.get_nowait()
                     if "Error" in line.strip():
-                        self.report({'ERROR'}, _("Mayo Convert CAD model failed: {}").format(line.strip()))
+                        self.report({'ERROR'}, _("Mayo Convert CAD model failed: {},Need to manually try to import the model into Mayo.").format(line.strip()))
                         bpy.context.workspace.status_text_set(None)
                         self.cancel(context)
                         return {'CANCELLED'}
@@ -1204,12 +1202,14 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 pass
 
             if self.stop_readpro:
-                context.workspace.status_text_set(lambda self, context: status_bar_draw(self, context,_("Converted ,Importing to Blender...")))#转换完成，Blender正在导入中...
+                context.workspace.status_text_set(lambda self, context: status_bar_draw(self, context,_("Mayo Convert completed, Blender is importing ...")))#转换完成，Blender正在导入中...
             # print(self._process.poll())            
             if self._process.poll() is not None:#用于检查子进程是否已经结束。设置并返回returncode属性。
                 # self.report({'INFO'}, "转换完成，正在导入中...")
                 print(f"Blender Importing....")
-                
+                # self.report({'INFO'}, _("Import completed in {:.2f}s").format(time.time()-self.start_time))
+                conttime=time.time()-self.start_time
+                startimporttime=time.time()
                 # 结束计时器
                 context.window_manager.event_timer_remove(self._timer)
                 self._timer = None
@@ -1228,7 +1228,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 准备文件路径
                 output_path = os.path.join(
                     os.path.dirname(self.filepath),
-                    os.path.splitext(os.path.basename(self.filepath))[0] + self.geshi
+                    os.path.splitext(os.path.basename(self.filepath))[0] + get_pre().geshi
                 )
 
                 # 增强文件检查
@@ -1251,12 +1251,12 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 执行导入操作
                 scale_factor = float(get_pre().global_scale)
                 try:
-                    if self.geshi == '.gltf':
+                    if get_pre().geshi == '.gltf':
                         bpy.ops.import_scene.gltf(
                             filepath=output_path,
                             merge_vertices=True
                         )
-                    elif self.geshi == '.obj':
+                    elif get_pre().geshi == '.obj':
                         # 使用新版本OBJ导入器
                         bpy.ops.wm.obj_import(
                             filepath=output_path,
@@ -1267,7 +1267,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                             use_split_groups=True,
                             collection_separator='/'
                         )
-                    # elif self.geshi == '.stl':  # 添加STL支持
+                    # elif get_pre().geshi == '.stl':  # 添加STL支持
                     #     bpy.ops.import_mesh.stl(
                     #         filepath=output_path,
                     #         global_scale=get_pre().global_scale
@@ -1281,7 +1281,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                     try:
                         os.remove(output_path)
                         # 同时清理关联文件（针对glTF）
-                        if self.geshi == '.obj':
+                        if get_pre().geshi == '.obj':
                             bin_path = os.path.splitext(output_path)[0] + ".mtl"
                             if os.path.exists(bin_path):
                                 os.remove(bin_path)
@@ -1294,7 +1294,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # 处理新导入的物体
                 new_objects = [obj for obj in bpy.context.view_layer.objects if obj not in self.initial_objects]
                 try:
-                    now = datetime.now()
+                    now = time.datetime.now()
                     now = int(now.strftime("%Y%m%d%H%M%S"))
                     for obj in new_objects:
                         obj.CADM_obj_Props.from_mayo=True
@@ -1338,7 +1338,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                                                 bpy.data.materials.remove(newmat)
 
 
-                if empty_object and self.geshi == '.gltf':
+                if empty_object and get_pre().geshi == '.gltf':
                     # 设置空物体为活动物体并选中
                     bpy.context.view_layer.objects.active = empty_object
                     empty_object.select_set(True)
@@ -1348,7 +1348,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                     empty_object.show_in_front = True
 
                     # 缩放空物体
-                    empty_object.scale = (0.1/scale_factor, 0.1/scale_factor, 0.1/scale_factor)
+                    empty_object.scale = (scale_factor/0.001, scale_factor/0.001, scale_factor/0.001)
                 # else:
                 #     # 取消所有物体的选择
                 #     for obj in new_objects:
@@ -1362,7 +1362,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                 # elapsed_s = "{:.2f}s".format(time.time() - self.start_time)
                 bpy.context.workspace.status_text_set(None)
                 # self.report({'INFO'}, f"导入流程完成(Import finished in {elapsed_s})")
-                self.report({'INFO'}, _("Import completed in {:.2f}s").format(time.time()-self.start_time))
+                self.report({'INFO'},_("Mayo convert use {:.2f}s,Blender import use {:.2f}s, The entire process took {:.2f}s!").format(conttime,time.time() -  startimporttime,time.time() - self.start_time))
                 return {'FINISHED'}
             # else:
 
@@ -1424,12 +1424,11 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
             return {'CANCELLED'}
 
         set_inifile_language()
-
         # 构建输出路径
         input_path = os.path.abspath(self.filepath)
         output_dir = os.path.dirname(input_path)
         output_base = os.path.splitext(os.path.basename(input_path))[0]
-        output_path = os.path.join(output_dir, output_base + self.geshi)
+        output_path = os.path.join(output_dir, output_base + get_pre().geshi)
 
         # 取消所有物体的选择
         for obj in bpy.context.selected_objects:
@@ -1451,7 +1450,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
             '--export', output_path,
             # '--no-progress',#可以返回INFO: "Importing..."但就没有进度了
         ]
-
+        self.start_time = time.time()
         try:
             self._process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             
@@ -1506,13 +1505,13 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         if hasattr(self, 'del_gltf') and get_pre().del_gltf:
             output_path = os.path.join(
                 os.path.dirname(self.filepath),
-                os.path.splitext(os.path.basename(self.filepath))[0] + self.geshi
+                os.path.splitext(os.path.basename(self.filepath))[0] + get_pre().geshi
             )
             try:
                 if os.path.exists(output_path):
                     os.remove(output_path)
                     # 清理关联文件
-                    if self.geshi == '.obj':
+                    if get_pre().geshi == '.obj':
                         bin_path = os.path.splitext(output_path)[0] + ".mtl"
                         if os.path.exists(bin_path):
                             os.remove(bin_path)
@@ -1523,6 +1522,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
 
 def status_bar_draw(self, context,text,importing=False,):
     layout = self.layout
+    layout.alert = True
     # if importing:
     layout.label(text="Cancel", icon="EVENT_ESC")
     layout.separator(factor=2.0)
@@ -1580,10 +1580,14 @@ specific_dict = {
     ('*', 'Controls CAD model to mesh conversion precision'): '控制Mayo导入CAD模型后转换到网格的转换精度',
     ('*', 'Very Coarse'): '非常粗糙',
     ('*', 'Fastest conversion with low detail'): '最快转换，细节最少',
+    ('*', 'Coarse Quality'): '粗糙质量',
     ('*', 'Coarse quality'): '粗糙质量',
+    ('*', 'Normal Quality'): '标准质量',
     ('*', 'Standard quality'): '标准质量',
+    ('*', 'Precise Quality'): '高精度',
     ('*', 'High precision'): '高精度',
-    ('*', 'Highest precision'): '最高精度',
+    ('*', 'Very Precise'): '超高精度',
+    ('*', 'Highest precision'): '超高精度',
     ('*', 'Scale Factor'): '缩放系数',
     ('*', 'Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format'): 
     'OBJ格式导入就是每个物体的缩放系数，\nGLTF格式导入就是父级空物体的缩放系数',
@@ -1620,15 +1624,16 @@ specific_dict = {
 
         # 操作类文本
     ('*', 'Import STEP/IGES'): '导入 STEP/IGES',
-    ('*', 'GLTF: Import with empty hierarchy'): 'GLTF：空物体父子层级结构',
-    ('*', 'OBJ: Import with collections'): 'OBJ：集合层级结构',
+    ('*', '.gltf (by parent Empty object)'): '.gltf (空物体父子层级结构)',
+    ('*', '.obj (by collections)'): '.obj (集合层级结构)',
     ('*', 'Lower values = Smaller model'): '数值越小，模型越小',
     ('*', 'Lower values = Larger model'): '数值越小，模型越大',
     ('*', 'Single file import only'): '仅支持单文件导入',
-    ('*', 'Mayo Convert CAD model failed: {}'): 'Mayo转换CAD模型失败：{}',
-    ('*', 'Please wait,Mayo Converting: {}'): '请稍候，Mayo 转换模型中：{}',
-    ('*', 'Converted ,Importing to Blender...'): '模型转换完成,Blender正在导入中...',
-    ('*', 'Import completed in {:.2f}s'): '导入完成，耗时 {:.2f} 秒',
+    ('*', 'Mayo Convert CAD model failed: {},Need to manually try to import the model into Mayo.'): 'Mayo转换CAD模型失败(试试手动去Mayo里导入模型检查下)：{}',
+    ('*', 'Please wait,Mayo Converting: {}'): '不要乱点鼠标，请稍候，Mayo 转换模型中：{}',
+    ('*', 'Mayo Convert completed, Blender is importing ...'): '模型转换完成,Blender正在导入中...',
+    ('*', 'Mayo convert use {:.2f}s,Blender import use {:.2f}s, The entire process took {:.2f}s!'): 
+    'Mayo转换模型用时 {:.2f} 秒,Blender 导入用时 {:.2f} 秒, 整个操作耗时 {:.2f} 秒!',
     ('*', 'Import has been cancelled.'): '导入操作已中止!',
 }
 japanese_dict = {
@@ -1722,9 +1727,9 @@ japanese_dict = {
     # 操作类文本
     ('*', 'Import STEP/IGES'): 
         'STEP/IGESをインポート',
-    ('*', 'GLTF: Import with empty hierarchy'): 
+    ('*', '.gltf (by parent Empty object)'): 
         'GLTF：空オブジェクト階層',
-    ('*', 'OBJ: Import with collections'): 
+    ('*', '.obj (by collections)'): 
         'OBJ：コレクション階層',
     ('*', 'Lower values = Smaller model'): 
         '値が小さいほど縮小',
@@ -1732,14 +1737,14 @@ japanese_dict = {
         '値が小さいほど拡大',
     ('*', 'Single file import only'): 
         '単一ファイルのみインポート可能',
-    ('*', 'Mayo Convert CAD model failed: {}'): 
-        'Mayo CADモデル変換失敗：{}',
+    ('*', 'Mayo Convert CAD model failed: {},Need to manually try to import the model into Mayo.'): 
+        'Mayo CADモデル変換失敗（手動でMayoにモデルをインポートしてみてください）：{}',
     ('*', 'Please wait,Mayo Converting: {}'): 
         '変換中：{}... お待ちください',
-    ('*', 'Converted ,Importing to Blender...'): 
+    ('*', 'Mayo Convert completed, Blender is importing ...'): 
         '変換完了、Blenderへインポート中...',
-    ('*', 'Import completed in {:.2f}s'): 
-        'インポート完了（所要時間：{:.2f}秒）',
+    ('*', 'Mayo convert use {:.2f}s,Blender import use {:.2f}s, The entire process took {:.2f}s!'): 
+        'Mayo 変換モデルの時間は {:.2f} 秒、Blender のインポート時間は {:.2f} 秒、全体の操作時間は {:.2f} 秒です！',
     ('*', 'Import has been cancelled.'): 
         'インポートがキャンセルされました',
 }

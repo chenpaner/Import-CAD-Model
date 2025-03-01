@@ -69,6 +69,8 @@ This addon requires  Windows
 2. **Drag-and-Drop**
    - Drag files directly into 3D Viewport
 
+![Import time test]<img src="doc/TRY-IMPORT.png"/> 
+
 ### Conversion Settings
 | Parameter          | Description                                                                 |
 |--------------------|-----------------------------------------------------------------------------|
