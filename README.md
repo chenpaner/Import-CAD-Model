@@ -5,11 +5,13 @@ English | [中文](./中文.md)
 [![Blender](https://img.shields.io/badge/Blender-4.0+-orange.svg)](https://www.blender.org)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
+<img src="doc/Schematic diagram.png"/> 
+
 A Blender addon that enables import of CAD files (STEP/IGES formats) through conversion to mesh formats using Mayo conversion toolkit.
 
-![Plugin Preferences]<img src="doc/en1.png"/> 
+Plugin Preferences<img src="doc/en1.png"/> 
 
-![Plugin Demo]<img src="doc/Demo.gif"/> 
+Plugin Demo<img src="doc/Demo.gif"/> 
 
 ## Features
 
@@ -69,7 +71,7 @@ This addon requires  Windows
 2. **Drag-and-Drop**
    - Drag files directly into 3D Viewport
 
-![Import time test]<img src="doc/TRY-IMPORT.png"/> 
+Import time test<img src="doc/TRY-IMPORT.png"/> 
 
 ### Conversion Settings
 | Parameter          | Description                                                                 |
