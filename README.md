@@ -1,8 +1,9 @@
+English | [中文](./中文.md)
+
+# Import CAD Model for Blender
 
 [![Blender](https://img.shields.io/badge/Blender-4.0+-orange.svg)](https://www.blender.org)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
-# Import CAD Model for Blender
 
 A Blender addon that enables import of CAD files (STEP/IGES formats) through conversion to mesh formats using Mayo conversion toolkit.
 
@@ -15,7 +16,7 @@ A Blender addon that enables import of CAD files (STEP/IGES formats) through con
   - Supports both drag-and-drop and traditional file import
   
 - ⚙️ **Conversion Options**
-  - Choose between GLTF (hierarchy preservation) or OBJ (fast import)
+  - Choose between GLTF or OBJ
   - Adjustable mesh quality levels (Very Coarse → Very Precise)
   - Custom scaling factors (0.0001x to 100x)
 
@@ -46,7 +47,7 @@ This addon requires  Windows
 -1. Download the latest `.zip` file from [Releases](https://github.com/chenpaner/Import-CAD-Model/releases).
 -2. In Blender, go to **Edit > Preferences > Add-ons**.
 -3. Click **Install...** and select the downloaded `.zip` file.
--4. Enable the checkbox next to "Stp/IGES Import".
+-4. Enable the checkbox next to "Import CAD Model ".
 
 2. **Configure Mayo Path**  
    ```python
@@ -74,13 +75,16 @@ This addon requires  Windows
 | **Global Scale**   | Adjust model scaling factor (0.0001-100)                                   |
 | **Post-Process**   | Auto-delete temp files, clean duplicate materials                          |
 
+## Languages supported
+   - English
+   - 中文
+   - 日本語
 
 
 ## Todo
 -  **Support opening multiple models at once**
 -  **Automatically update models (instead of re-importing them)**
 
----
 
 **Disclaimer**  
 This addon is not affiliated with the Mayo project. CAD conversion quality depends on Mayo's core functionality.
