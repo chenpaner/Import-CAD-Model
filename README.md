@@ -7,7 +7,9 @@ English | [中文](./中文.md)
 
 A Blender addon that enables import of CAD files (STEP/IGES formats) through conversion to mesh formats using Mayo conversion toolkit.
 
-![Plugin Demo]<img src="doc/en1.png"/> 
+![Plugin Preferences]<img src="doc/en1.png"/> 
+
+![Plugin Demo]<img src="doc/Demo.mp4"/> 
 
 ## Features
 
@@ -43,18 +45,18 @@ This addon requires  Windows
 
 ## Installation
 
-1. **Install Addon**
--1. Download the latest `.zip` file from [Releases](https://github.com/chenpaner/Import-CAD-Model/releases).
--2. In Blender, go to **Edit > Preferences > Add-ons**.
--3. Click **Install...** and select the downloaded `.zip` file.
--4. Enable the checkbox next to "Import CAD Model ".
+1. Download the latest `.zip` file from [Releases](https://github.com/chenpaner/Import-CAD-Model/releases).
+2. In Blender, go to **Edit > Preferences > Add-ons**.
+3. Click **Install...** and select the downloaded `.zip` file.
+4. Enable the checkbox next to "Import CAD Model ".
 
-2. **Configure Mayo Path**  
+5. **Configure Mayo Path**  
    ```python
    # In Blender Preferences:
-   Add-ons > Import-Export > Import CAD Model 
+   Add-ons > Import CAD Model 
    Set path to mayo-conv.exe in addon preferences
    ```
+
 
 ## Usage
 
