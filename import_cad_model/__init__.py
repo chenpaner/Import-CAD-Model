@@ -59,6 +59,88 @@ def update_inifile(self, context):
     with open(ini_path, 'w') as configfile:
         config.write(configfile)
 
+def update_chordal_deflection(self, context):
+    sna_updated_prop = self.chordal_deflection
+    value=(str(round(sna_updated_prop, abs(2))) + 'mm')
+
+    ini_path = get_ini_directory()
+    if not os.path.isfile(ini_path):
+        print(_('No found the mayo-gui.ini file in plugin directory!'))
+        return
+
+    config = configparser.ConfigParser()
+    config.read(ini_path)
+
+    # 读取ini_path这个文件，找到这个文件里以meshingQuality=开头的这行，将这行改为meshingQuality=self.mesh_quality,然后保存文件
+
+    # 检查 meshing section 是否存在，并且 meshingchordaldeflection 是否在其中
+    if 'meshing' in config and 'meshingchordaldeflection' in config['meshing']:
+        # 如果存在，则更新 meshingchordaldeflection 的值
+        config['meshing']['meshingchordaldeflection'] = value
+    else:
+        # 如果不存在，则添加 meshingchordaldeflection 到 meshing section
+        if 'meshing' not in config:
+            config['meshing'] = {}
+        config['meshing']['meshingchordaldeflection'] = value
+
+    with open(ini_path, 'w') as configfile:
+        config.write(configfile)
+
+
+def update_angular_deflection(self, context):
+    sna_updated_prop = self.angular_deflection
+    value=(str(round(sna_updated_prop, abs(6))) + 'rad')
+
+    ini_path = get_ini_directory()
+    if not os.path.isfile(ini_path):
+        print(_('No found the mayo-gui.ini file in plugin directory!'))
+        return
+
+    config = configparser.ConfigParser()
+    config.read(ini_path)
+
+    # 读取ini_path这个文件，找到这个文件里以meshingQuality=开头的这行，将这行改为meshingQuality=self.mesh_quality,然后保存文件
+
+    # 检查 meshing section 是否存在，并且 meshingangulardeflection 是否在其中
+    if 'meshing' in config and 'meshingangulardeflection' in config['meshing']:
+        # 如果存在，则更新 meshingangulardeflection 的值
+        config['meshing']['meshingangulardeflection'] = value
+    else:
+        # 如果不存在，则添加 meshingangulardeflection 到 meshing section
+        if 'meshing' not in config:
+            config['meshing'] = {}
+        config['meshing']['meshingangulardeflection'] = value
+
+    with open(ini_path, 'w') as configfile:
+        config.write(configfile)
+
+
+def update_relatire(self, context):
+    value='ture' if self.relatire else 'false'
+
+    ini_path = get_ini_directory()
+    if not os.path.isfile(ini_path):
+        print(_('No found the mayo-gui.ini file in plugin directory!'))
+        return
+
+    config = configparser.ConfigParser()
+    config.read(ini_path)
+
+    # 读取ini_path这个文件，找到这个文件里以meshingQuality=开头的这行，将这行改为meshingQuality=self.mesh_quality,然后保存文件
+
+    # 检查 meshing section 是否存在，并且 meshingrelative 是否在其中
+    if 'meshing' in config and 'meshingrelative' in config['meshing']:
+        # 如果存在，则更新 meshingrelative 的值
+        config['meshing']['meshingrelative'] = value
+    else:
+        # 如果不存在，则添加 meshingrelative 到 meshing section
+        if 'meshing' not in config:
+            config['meshing'] = {}
+        config['meshing']['meshingrelative'] = value
+
+    with open(ini_path, 'w') as configfile:
+        config.write(configfile)
+
 #####每次操作前都要把语言设置为en，不然可能返回的内容是中文
 def set_inifile_language():
     ini_path = get_ini_directory()
@@ -131,11 +213,23 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
             ('Coarse', _('Coarse Quality'), _('Coarse quality'), 0, 1),  
             ('Normal', _('Normal Quality'), _('Standard quality'), 0, 2),  
             ('Precise', _('Precise Quality'), _('High precision'), 0, 3),  
-            ('VeryPrecise', _('Very Precise'), _('Highest precision'), 0, 4)],  
+            ('VeryPrecise', _('Very Precise'), _('Highest precision'), 0, 4),  
+            ('UserDefined', _('User Defined'), _('User Defined'), 0, 5)],
         default='Normal',
         update=update_inifile
     )
     
+    chordal_deflection: bpy.props.FloatProperty(name=_('Chordal Deflection(mm)'), 
+        description=_('For the tessellation of faces the Chordal Deflection limits the distance between a curve and its tessellation\nThe smaller the value, the more grids.'), 
+        default=1.0, subtype='NONE', unit='NONE', min=0.1, step=3, precision=2, update=update_chordal_deflection)
+
+    angular_deflection: bpy.props.FloatProperty(name=_('Angular Deflection'), 
+        description=_('For the tessellation of faces the angular deflection limits the angle between subsequent segments in a polyline\nThe smaller the value, the more grids.'), 
+        default=0.34906585, subtype='ANGLE', unit='NONE', min=0.01745329, step=3, precision=2, update=update_angular_deflection)
+
+    relatire: bpy.props.BoolProperty(name=_('Relatire'), description=_('Relative computation of edge tolerance.\nIf activated, deflection used for the polygonalisation of each edge will be ChordalDeflection X SizeOfEdge.The deflection used for the faces will be the maximum deflection of their edges.'), 
+        default=False, update=update_relatire)
+
     # global_scale : FloatProperty(
     # name='Scale', 
     # description='Value by which to enlarge or shrink the objects with respect to the world origin', 
@@ -195,6 +289,12 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         default=True,
     )
 
+    clean_reimport_obj: BoolProperty(
+        name=_('Automatically delete duplicate imported objects.'),  
+        description=_('Remove duplicate imported objects with .001 suffixes,如果新导入的物体的无后缀网格名已出现当前场景里,并且网格的顶点数一样,则自动删除新导入的'),  
+        default=False,
+    )
+
     def draw(self, context):
         layout = self.layout
         row = layout.box().column(align=True)
@@ -234,8 +334,9 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         row.label(text='   b) Manually import the CAD file in Mayo')
         row.label(text='   c) After optimization, click "Exchange > Save as..." at bottom of Options panel')
         row.label(text='   d) Overwrite the mayo-gui.ini file in plugin directory')
-        row.label(text='3. The meshingQuality parameter in the mayo-gui.ini file can be manually set in the import panel.')
-        row.label(text='4. Usage: File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop to 3D Viewport')
+        row.label(text='3. The meshing parameter in the mayo-gui.ini file can be manually set in the import panel.')
+        row.label(text='4. The exported results of Mayo (GUI app) and mayo-conv may be different, even when using the same settings')
+        row.label(text='5. Usage: File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop to 3D Viewport')
 
 
         layout = self.layout 
@@ -1118,7 +1219,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         pre=get_pre()
-
+        layout.label(text='Mayo Export')
         # t=_(".obj (by collections)") if pre.geshi == '.obj' else _(".gltf (by parent Empty object)")
         # row=layout.row()
         # row.alert = True
@@ -1127,12 +1228,17 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         layout.prop(pre, 'geshi')
 
         layout.prop(pre, 'mesh_quality')
+        if pre.mesh_quality=='UserDefined':
+            layout.prop(pre, 'chordal_deflection')
+            layout.prop(pre, 'angular_deflection')
+            layout.prop(pre, 'relatire')
 
         if bpy.app.version >= (4, 2):
             layout.separator(type="LINE")  
         else:
-            layout.separator()
+            layout.label(text='.....................................................')
 
+        layout.label(text='Blender Import')
         # row=layout.row()
         # row.alert = True
         # row.alignment = 'RIGHT'.upper()#'EXPAND', 'LEFT', 'CENTER', 'RIGHT'
@@ -1145,7 +1251,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         if bpy.app.version >= (4, 2):
             layout.separator(type="LINE")  
         else:
-            layout.separator()
+            layout.label(text='.....................................................')
         
 
         layout.prop(pre, 'del_gltf')
@@ -1155,11 +1261,7 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
 
     def invoke(self, context, event):
         self.start_time = time.time()
-        try:
-            context.space_data.clip_start=0.001
-            context.space_data.clip_end = 100000
-        except:
-            pass
+        
 
         if len(self.files) > 1:
             self.report({'ERROR'}, _("Single file import only"))
@@ -1233,7 +1335,8 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
 
                 # 增强文件检查
                 if not os.path.exists(output_path):
-                    self.report({'ERROR'}, f"Can`t found mesh model: {output_path}")
+                    self.report({'ERROR'}, f"Mayo Convert CAD model failed,Can`t found exported mesh model: {output_path}")
+                    bpy.context.workspace.status_text_set(None)
                     return {'CANCELLED'}
 
                 # 确保文件可读
@@ -1241,7 +1344,8 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
                     with open(output_path, 'rb') as f_test:
                         pass
                 except IOError as e:
-                    self.report({'ERROR'}, f"Can`t read mesh model: {str(e)}")
+                    self.report({'ERROR'}, f"Can`t read exported mesh model: {str(e)}")
+                    bpy.context.workspace.status_text_set(None)
                     return {'CANCELLED'}
 
                 # # 取消所有物体的选择
@@ -1424,6 +1528,13 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
             return {'CANCELLED'}
 
         set_inifile_language()
+
+        try:
+            context.space_data.clip_start=0.001
+            context.space_data.clip_end = 100000
+        except:
+            pass
+
         # 构建输出路径
         input_path = os.path.abspath(self.filepath)
         output_dir = os.path.dirname(input_path)
@@ -1527,13 +1638,13 @@ def status_bar_draw(self, context,text,importing=False,):
     layout.label(text="Cancel", icon="EVENT_ESC")
     layout.separator(factor=2.0)
     layout.label(text=f"{text}", icon="TEMP")
-    
-    
+
 
 def sna_add_to_topbar_mt_file_import_4A389(self, context):
     self.layout.operator(IMPORT_OT_STEPtoGLTF.bl_idname, text='STEP/IGES (*.step *.stp *.iges *.igs)',emboss=True, depress=False)
         
 #TODO:自动更新网格避免重复导入,拖入多个文件,添加导入预设保存;是否可以让mayo直接转换obj和iges两种，然后让用户一次把2种都导入
+#自动更新网格避免重复导入，比如一个之前已经导入过的，并且新导入的网格数一样(这里要提示导入的网格精度要一致)，就直接删除新导入的
 
 class IO_FH_Step_Iges(bpy.types.FileHandler):
     bl_idname = "IO_FH_step_iges"
@@ -1588,6 +1699,21 @@ specific_dict = {
     ('*', 'High precision'): '高精度',
     ('*', 'Very Precise'): '超高精度',
     ('*', 'Highest precision'): '超高精度',
+    ('*', 'User Defined'): '自定义设置',
+
+    ('*', 'Chordal Deflection(mm)'): '弦高公差(mm)',
+    ('*', 'For the tessellation of faces the Chordal Deflection limits the distance between a curve and its tessellation\nThe smaller the value, the more grids.'): 
+    '弦高公差：限制曲线与网格折线间的最大距离\n数值越小网格越多',
+    
+    ('*', 'Angular Deflection'): '角度公差',
+    ('*', 'For the tessellation of faces the angular deflection limits the angle between subsequent segments in a polyline\nThe smaller the value, the more grids.'): 
+    '角度公差：限制折线相邻线段间的最大角度\n数值越小网格越多',
+
+    ('*', 'Relatire'): '相对公差',
+    ('*', 'Relative computation of edge tolerance.\nIf activated, deflection used for the polygonalisation of each edge will be ChordalDeflection X SizeOfEdge.The deflection used for the faces will be the maximum deflection of their edges.'): 
+    '边缘公差的相对计算\n如果激活，每个边缘的多边形化使用的偏差将是ChordalDeflection X SizeOfEdge。面使用的偏差将是其边缘的最大偏差。',
+
+
     ('*', 'Scale Factor'): '缩放系数',
     ('*', 'Scaling factor for each object in OBJ format,\nScaling factor of the parent empty object in GLTF format'): 
     'OBJ格式导入就是每个物体的缩放系数，\nGLTF格式导入就是父级空物体的缩放系数',
@@ -1611,10 +1737,13 @@ specific_dict = {
         '   c) 调整参数到导入的模型网格符合你的要求后，在Options面板底部点击 Exchange->Save as...',
     ('*', '   d) Overwrite the mayo-gui.ini file in plugin directory'): 
         '   d) 覆盖插件目录下的mayo-gui.ini文件',
-    ('*', '3. The meshingQuality parameter in the mayo-gui.ini file can be manually set in the import panel.'): 
+    ('*', '3. The meshing parameter in the mayo-gui.ini file can be manually set in the import panel.'): 
         '3. mayo-gui.ini文件里的meshingQuality参数可在导入面板里手动设置',
-    ('*', '4. Usage: File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop to 3D Viewport'): 
-        '4. 使用方法：文件 > 导入 > STEP/IGES 或 直接拖动模型到3D窗口里',
+        
+    ('*', '4. The exported results of Mayo (GUI app) and mayo-conv may be different, even when using the same settings'): 
+        '4.即使在相同的设置下用Mayo.exe直接手动导出的网格和用插件通过指令后台导出的网格效果可能有差异',
+    ('*', '5. Usage: File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop to 3D Viewport'): 
+        '5. 使用方法：文件 > 导入 > STEP/IGES 或 直接拖动模型到3D窗口里',
 
     ('*', 'Sell a plugin ^_~'): '卖个插件 ^_~', 
     ('*', 'A plug-in that can be converted between the collection and the empty object hierarchy!'): 
@@ -1714,8 +1843,10 @@ japanese_dict = {
         '   d) プラグインディレクトリのmayo-gui.iniを上書き',
     ('*', '3. The meshingQuality parameter can be auto-configured via import panel settings'): 
         '3. meshingQualityパラメータはインポートパネルで自動設定可能',
-    ('*', '4. Usage: File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop to 3D Viewport'): 
-        '4. 使用方法：ファイルメニューまたは3Dビューポートへドラッグ＆ドロップ',
+    ('*', '4. The exported results of Mayo (GUI app) and mayo-conv may be different, even when using the same settings'): 
+        '4. 同じ設定でMayo.exeを使用して直接手動でエクスポートしたメッシュと、プラグインを使用して指令バックグラウンドでエクスポートしたメッシュの効果は異なる場合があります。',
+    ('*', '5. Usage: File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop to 3D Viewport'): 
+        '5. 使用方法：ファイルメニューまたは3Dビューポートへドラッグ＆ドロップ',
 
     ('*', 'Sell a plugin ^_~'): 
         'プラグイン販売中 ^_~', 
