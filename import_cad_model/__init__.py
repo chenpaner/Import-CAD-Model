@@ -278,9 +278,9 @@ class MayoConvPreferences(bpy.types.AddonPreferences):
         op.url = 'https://blendermarket.com/products/empty--collection-switcher'
 
 class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
-    """Convert STEP to glTF and import"""
     bl_idname = "import_scene.step_to_gltf"
-    bl_label = "Import STEP/IGES"
+    bl_label = "Import STP/IGES(By Mayo)"
+    bl_description = "Convert STP/IGES to glTF/obj by Mayo and Import"
     bl_options = {'UNDO'}
     filter_glob: bpy.props.StringProperty(
         default="*.step;*.stp;*.iges;*.igs",
@@ -855,4 +855,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-    bpy.ops.object.empty_image_add(filepath="E:\\My pictur\\original-809518e20eb5c6ea8f5d3405fe30484d.png", align='VIEW', location=(-1.12752, -0.287579, 0.172981), rotation=(1.02655, 1.4934e-07, 0.339823), scale=(1, 1, 1))
+    
