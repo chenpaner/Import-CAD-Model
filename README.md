@@ -95,3 +95,8 @@ Import time test<img src="doc/TRY-IMPORT.png"/>
 **Disclaimer**  
 This addon is not affiliated with the Mayo project. CAD conversion quality depends on Mayo's core functionality.
 
+## Support
+You can support me directly via PayPal: [https://www.paypal.me/chenpaner](https://paypal.me/chenpaner?country.x=C2&locale.x=zh_XC)
+
+Or you can check out one of my paid addons: https://blendermarket.com/creators/cp-design
+
