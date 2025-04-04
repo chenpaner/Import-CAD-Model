@@ -288,7 +288,8 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
     )
     directory: bpy.props.StringProperty(subtype='FILE_PATH', options={'SKIP_SAVE', 'HIDDEN'})
     files: bpy.props.CollectionProperty(type=bpy.types.OperatorFileListElement, options={'SKIP_SAVE', 'HIDDEN'})
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.stop_readpro = False
         self._timer = None
         self._process = None
