@@ -4,7 +4,7 @@ bl_info = {
     "author" : "CP-Design", 
     "description" : "This addon lets you import CAD Model(stp/iges) files in Blender 4.0+",
     "blender" : (4, 0, 0),
-    "version" : (1, 0, 0),
+    "version" : (1, 1, 0),
     "location" : "File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop",
     "warning" : "Only Blender 4.0+ versions and Windows are supported",
     "doc_url": "", 
