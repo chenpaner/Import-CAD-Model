@@ -35,12 +35,22 @@ Plugin Demo<img src="doc/Demo.gif"/>
 
 ## System Requirements
 
-❗ **Windows Only**  
-This addon requires  Windows 
+**Windows and macOS are supported.**
 
 1. **Mayo Conversion Tool**  
-   Download Mayo-x.x.x-win64-binaries.zip or Mayo-x.x.x-win64-installer.exe from:  
-   [https://github.com/fougue/mayo/releases](https://github.com/fougue/mayo/releases)
+   - **Windows**: Download Mayo-x.x.x-win64-binaries.zip or Mayo-x.x.x-win64-installer.exe from:  
+     [https://github.com/fougue/mayo/releases](https://github.com/fougue/mayo/releases)
+   - **macOS**: No prebuilt binaries are published, but Mayo builds fine from source
+     (Qt and OpenCascade are both available via Homebrew):
+     ```bash
+     brew install cmake qt opencascade
+     git clone --branch v0.10.0 https://github.com/fougue/mayo.git
+     cmake -S mayo -B build-mayo -DCMAKE_BUILD_TYPE=Release -DMayo_BuildApp=OFF \
+       -DQT_DIR="$(brew --prefix qt)/lib/cmake/Qt6"
+     cmake --build build-mayo --target mayo-conv --parallel $(sysctl -n hw.ncpu)
+     ```
+     See also the official [Mayo macOS build instructions](https://github.com/fougue/mayo/wiki/Build-instructions-for-macOS).
+     Only the `mayo-conv` CLI target is needed by this addon.
 
 2. **Blender**  
 	- **Blender**:4.0 and newer
@@ -56,7 +66,8 @@ This addon requires  Windows
    ```python
    # In Blender Preferences:
    Add-ons > Import CAD Model 
-   Set path to mayo-conv.exe in addon preferences
+   Set path to the mayo-conv executable in addon preferences
+   (mayo-conv.exe on Windows, the built mayo-conv binary on macOS)
    ```
 
 
@@ -99,4 +110,3 @@ This addon is not affiliated with the Mayo project. CAD conversion quality depen
 You can support me directly via PayPal: [https://www.paypal.me/chenpaner](https://paypal.me/chenpaner?country.x=C2&locale.x=zh_XC)
 
 Or you can check out one of my paid addons: https://blendermarket.com/creators/cp-design
-
