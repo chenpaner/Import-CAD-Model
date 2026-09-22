@@ -4,9 +4,9 @@ bl_info = {
     "author" : "CP-Design", 
     "description" : "This addon lets you import CAD Model(stp/iges) files in Blender 4.0+",
     "blender" : (4, 0, 0),
-    "version" : (1, 1, 0),
+    "version" : (1, 1, 1),
     "location" : "File > Import > STEP/IGES (*.step *.stp *.iges *.igs) or Drag-and-Drop",
-    "warning" : "Only Blender 4.0+ versions and Windows are supported",
+    "warning" : "Blender 4.0+; Windows and macOS (macOS needs mayo-conv built from source)",
     "doc_url": "", 
     "tracker_url": "", 
     "category" : "Import" 
@@ -431,19 +431,20 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
 
                 new_objects = [obj for obj in bpy.context.view_layer.objects if obj not in self.initial_objects]
                 try:
-                    now = time.datetime.now()
+                    import datetime
+                    now = datetime.datetime.now()
                     now = int(now.strftime("%Y%m%d%H%M%S"))
                     for obj in new_objects:
-                        obj.CADM_obj_Props.from_mayo=True
-                        obj.CADM_obj_Props.import_time=now
+                        obj.CADM_Props.from_mayo=True
+                        obj.CADM_Props.import_time=now
                         if obj.type == 'MESH':
                             meshname=obj.data.name
                             match = suffix_pattern.search(obj.data.name)
                             if match:
                                 meshname = suffix_pattern.sub('', obj.data.name)
-                            obj.CADM_obj_Props.mesh_name=meshname
-                            bpy.data.meshes[obj.data.name].CADM_mesh_Props.base_name=meshname
-                            bpy.data.meshes[obj.data.name].CADM_mesh_Props.import_time=now
+                            obj.CADM_Props.mesh_name=meshname
+                            bpy.data.meshes[obj.data.name].CADM_Props.base_name=meshname
+                            bpy.data.meshes[obj.data.name].CADM_Props.import_time=now
                 except:
                     pass
                 new_mats = [mat for mat in bpy.data.materials if mat not in self.before_import_mat]
@@ -499,8 +500,10 @@ class IMPORT_OT_STEPtoGLTF(bpy.types.Operator, ImportHelper):
         if not os.path.isfile(get_pre().exe_path):
             self.report({'ERROR'}, "mayo-conv.exe path wrong！")
             return {'CANCELLED'}
-        if os.path.basename(get_pre().exe_path).lower() != "mayo-conv.exe":
-            self.report({'ERROR'}, "The path does not point to mayo-conv.exe!")
+        exe_name = os.path.basename(get_pre().exe_path).lower()
+        allowed_names = ("mayo-conv.exe",) if sys.platform == "win32" else ("mayo-conv", "mayo-conv.exe")
+        if exe_name not in allowed_names:
+            self.report({'ERROR'}, "The path does not point to mayo-conv!")
             return {'CANCELLED'}
         ini_path = get_ini_directory()
         if not os.path.isfile(ini_path):
@@ -834,8 +837,8 @@ def register():
         print('Only Blender 4.0 and later versions are supported')
         return
 
-    if sys.platform != 'win32':
-        print('This plugin is only supported on Windows')
+    if sys.platform not in ('win32', 'darwin'):
+        print('This addon supports Windows and macOS only')
         return
     for c in classes:
         bpy.utils.register_class(c)
